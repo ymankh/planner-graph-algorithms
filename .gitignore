@@ -8,8 +8,26 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+
+# Build output
 dist
+dist-package
 dist-ssr
+apps/**/dist
+apps/**/dist-package
+apps/**/dist-ssr
+packages/**/dist
+packages/**/dist-package
+packages/**/dist-ssr
+coverage
+apps/**/coverage
+packages/**/coverage
+*.tsbuildinfo
+*.tgz
+.vite
+apps/**/.vite
+packages/**/.vite
+
 *.local
 
 # Editor directories and files

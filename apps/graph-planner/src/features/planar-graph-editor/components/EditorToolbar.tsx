@@ -4,6 +4,7 @@ type EditorToolbarProps = {
   nodeCount: number;
   edgeCount: number;
   selectedNodeId: string | null;
+  analysisStatus: 'idle' | 'running' | 'ready' | 'error';
 };
 
 export function EditorToolbar({
@@ -12,7 +13,10 @@ export function EditorToolbar({
   nodeCount,
   edgeCount,
   selectedNodeId,
+  analysisStatus,
 }: EditorToolbarProps) {
+  const isRunning = analysisStatus === 'running';
+
   return (
     <header className="editor-toolbar">
       <div className="toolbar-layout">
@@ -34,6 +38,12 @@ export function EditorToolbar({
             <span className="toolbar-pill">
               {selectedNodeId ? `Connecting from ${selectedNodeId}` : 'No node selected'}
             </span>
+            <span className={[
+              'toolbar-pill',
+              isRunning ? 'toolbar-pill--running' : '',
+            ].join(' ')}>
+              {isRunning ? 'Calculating regions...' : `Analysis: ${analysisStatus}`}
+            </span>
           </div>
         </div>
 
@@ -42,8 +52,9 @@ export function EditorToolbar({
             type="button"
             onClick={onDetectRegions}
             className="button button--primary"
+            disabled={isRunning}
           >
-            Detect regions
+            {isRunning ? 'Working...' : 'Detect regions'}
           </button>
           <button
             type="button"

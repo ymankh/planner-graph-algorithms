@@ -6,6 +6,10 @@
     "module": "esnext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "graph-planner-algorithms": ["../../packages/graph-planner-algorithms/src"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Edge, PointNode } from 'graph-planner-algorithms';
 import { useGraphDerivedData } from '../hooks/useGraphDerivedData';
 import { usePlanarGraphEditor } from '../hooks/usePlanarGraphEditor';
-import type { Edge, PointNode } from '../types/graph';
 import { GraphCanvas } from './GraphCanvas';
 import { EditorToolbar } from './EditorToolbar';
 import { FaceList } from './FaceList';
@@ -30,7 +30,15 @@ export function PlanarGraphEditor({
     selectFace,
     selectNodeForConnection,
   } = usePlanarGraphEditor({ initialNodes, initialEdges });
-  const derived = useGraphDerivedData(nodes, edges, selectedFaceId);
+  const {
+    faces,
+    hasCrossings,
+    selectedFace,
+    selectedFacePolygonPoints,
+    analysisStatus,
+    analysisError,
+    detectRegions,
+  } = useGraphDerivedData(nodes, edges, selectedFaceId);
   const stageShellRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 900, height: 620 });
 
@@ -81,7 +89,7 @@ export function PlanarGraphEditor({
     [connectNodes, selectNodeForConnection, selectedNodeId],
   );
 
-  const handleNodeDragMove = useCallback(
+  const handleNodeDragEnd = useCallback(
     (nodeId: string, x: number, y: number) => {
       moveNode(nodeId, x, y);
     },
@@ -89,9 +97,8 @@ export function PlanarGraphEditor({
   );
 
   const handleDetectRegions = useCallback(() => {
-    const firstInnerFace = derived.faces.find((face) => !face.isOuter) ?? null;
-    selectFace(firstInnerFace?.id ?? null);
-  }, [derived.faces, selectFace]);
+    detectRegions();
+  }, [detectRegions]);
 
   return (
     <div className={['editor-shell', className ?? ''].filter(Boolean).join(' ')}>
@@ -102,6 +109,7 @@ export function PlanarGraphEditor({
           nodeCount={nodes.length}
           edgeCount={edges.length}
           selectedNodeId={selectedNodeId}
+          analysisStatus={analysisStatus}
         />
 
         <div className="main-grid">
@@ -112,18 +120,23 @@ export function PlanarGraphEditor({
               nodes={nodes}
               edges={edges}
               selectedNodeId={selectedNodeId}
-              selectedFace={derived.selectedFace}
-              selectedFacePolygonPoints={derived.selectedFacePolygonPoints}
+              selectedFace={selectedFace}
+              selectedFacePolygonPoints={selectedFacePolygonPoints}
               onCanvasClick={handleCanvasClick}
               onNodeClick={handleNodeClick}
-              onNodeDragMove={handleNodeDragMove}
+              onNodeDragEnd={handleNodeDragEnd}
             />
           </div>
 
           <div className="sidebar-stack">
-            <PlanarityWarning show={derived.hasCrossings} />
+            <PlanarityWarning show={hasCrossings} />
+            {analysisError ? (
+              <div className="warning-banner" role="alert">
+                {analysisError}
+              </div>
+            ) : null}
             <FaceList
-              faces={derived.faces}
+              faces={faces}
               selectedFaceId={selectedFaceId}
               onSelectFace={selectFace}
             />
@@ -135,12 +148,15 @@ export function PlanarGraphEditor({
               <ul className="help-list">
                 <li>1. Click empty space to add a point.</li>
                 <li>2. Click one point and then another to connect them.</li>
-                <li>3. Drag points to reshape the graph and update the regions.</li>
-                <li>4. Select an inner region in the list to highlight it.</li>
+                <li>3. Drag points to reshape the graph.</li>
+                <li>4. Press Detect regions after edits, then select an inner region to highlight it.</li>
               </ul>
               <div className="help-note">
-                Derived data is recomputed from the current nodes and edges; no face state is
-                stored separately.
+                Region detection runs in a worker so adding lots of points stays responsive.
+              </div>
+              <div className="help-note">
+                Status: {analysisStatus}
+                {analysisStatus === 'running' ? ' - calculating faces and crossings in the background.' : ''}
               </div>
             </section>
           </div>

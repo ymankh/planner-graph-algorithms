@@ -1,6 +1,6 @@
-import { memo } from 'react';
-import { Layer, Rect, Stage } from 'react-konva';
-import type { Edge, Face, NodeId, PointNode } from '../types/graph';
+import { memo, useMemo } from 'react';
+import { FastLayer, Layer, Stage } from 'react-konva';
+import type { Edge, Face, NodeId, PointNode } from 'graph-planner-algorithms';
 import { GraphEdge } from './GraphEdge';
 import { GraphNode } from './GraphNode';
 import { SelectedFaceOverlay } from './SelectedFaceOverlay';
@@ -15,7 +15,7 @@ type GraphCanvasProps = {
   selectedFacePolygonPoints: number[];
   onCanvasClick: (x: number, y: number) => void;
   onNodeClick: (nodeId: NodeId) => void;
-  onNodeDragMove: (nodeId: NodeId, x: number, y: number) => void;
+  onNodeDragEnd: (nodeId: NodeId, x: number, y: number) => void;
 };
 
 function GraphCanvasComponent({
@@ -28,36 +28,36 @@ function GraphCanvasComponent({
   selectedFacePolygonPoints,
   onCanvasClick,
   onNodeClick,
-  onNodeDragMove,
+  onNodeDragEnd,
 }: GraphCanvasProps) {
-  const nodeMap = new Map(nodes.map((node) => [node.id, node] as const));
+  const nodeMap = useMemo(() => new Map(nodes.map((node) => [node.id, node] as const)), [nodes]);
 
   return (
     <div className="canvas-frame">
-      <Stage width={width} height={height} style={{ display: 'block' }}>
-        <Layer>
-          <Rect
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            fill="#07111f"
-            onMouseDown={(event) => {
-              const stage = event.target.getStage();
-              const pointer = stage?.getPointerPosition();
-              if (pointer) {
-                onCanvasClick(pointer.x, pointer.y);
-              }
-            }}
-            onTouchStart={(event) => {
-              const stage = event.target.getStage();
-              const pointer = stage?.getPointerPosition();
-              if (pointer) {
-                onCanvasClick(pointer.x, pointer.y);
-              }
-            }}
-          />
-
+      <Stage
+        width={width}
+        height={height}
+        style={{ display: 'block' }}
+        onMouseDown={(event) => {
+          const stage = event.target.getStage();
+          if (stage && event.target === stage) {
+            const pointer = stage.getPointerPosition();
+            if (pointer) {
+              onCanvasClick(pointer.x, pointer.y);
+            }
+          }
+        }}
+        onTouchStart={(event) => {
+          const stage = event.target.getStage();
+          if (stage && event.target === stage) {
+            const pointer = stage.getPointerPosition();
+            if (pointer) {
+              onCanvasClick(pointer.x, pointer.y);
+            }
+          }
+        }}
+      >
+        <FastLayer listening={false}>
           <SelectedFaceOverlay
             points={selectedFacePolygonPoints}
             visible={Boolean(selectedFace && !selectedFace.isOuter)}
@@ -72,7 +72,8 @@ function GraphCanvasComponent({
 
             return <GraphEdge key={edge.id} edge={edge} from={from} to={to} />;
           })}
-
+        </FastLayer>
+        <Layer>
           {nodes.map((node) => (
             <GraphNode
               key={node.id}
@@ -80,7 +81,7 @@ function GraphCanvasComponent({
               selected={selectedNodeId === node.id}
               connecting={selectedNodeId === node.id}
               onClick={onNodeClick}
-              onDragMove={onNodeDragMove}
+              onDragEnd={onNodeDragEnd}
             />
           ))}
         </Layer>

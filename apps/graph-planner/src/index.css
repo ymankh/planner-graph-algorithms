@@ -60,6 +60,7 @@ button {
   display: grid;
   gap: 16px;
   flex: 1;
+  align-items: start;
 }
 
 @media (min-width: 1024px) {
@@ -86,6 +87,7 @@ button {
 
 .canvas-frame {
   overflow: hidden;
+  height: 100%;
 }
 
 .editor-toolbar {
@@ -147,6 +149,12 @@ button {
   background: rgba(15, 23, 42, 0.8);
 }
 
+.toolbar-pill--running {
+  border-color: rgba(34, 211, 238, 0.45);
+  color: #ecfeff;
+  background: rgba(34, 211, 238, 0.14);
+}
+
 .toolbar-actions {
   display: flex;
   flex-wrap: wrap;
@@ -191,10 +199,33 @@ button {
   background: rgba(251, 113, 133, 0.22);
 }
 
+.button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+  transform: none;
+}
+
 .sidebar-stack {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .canvas-shell {
+    position: sticky;
+    top: 16px;
+    height: calc(100vh - 32px - 124px);
+    min-height: 620px;
+  }
+
+  .sidebar-stack {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px - 124px);
+    overflow: auto;
+    padding-right: 4px;
+  }
 }
 
 .panel,

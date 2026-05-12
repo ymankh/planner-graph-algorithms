@@ -1,0 +1,45 @@
+{
+  "name": "graph-planner-algorithms",
+  "private": false,
+  "version": "0.0.0",
+  "description": "Pure TypeScript utilities for detecting faces in straight-line planar graphs.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "license": "MIT",
+  "keywords": [
+    "planar-graph",
+    "graph",
+    "geometry",
+    "faces",
+    "typescript"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.json --emitDeclarationOnly",
+    "prepack": "npm run build",
+    "pack:dry-run": "npm pack --dry-run",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "vitest bench",
+    "bench:report": "tsx benchmarks/detectFaces.report.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.6"
+  }
+}

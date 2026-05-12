@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import type { Face } from '../types/graph';
+import type { Face } from 'graph-planner-algorithms';
 
 type FaceListProps = {
   faces: Face[];

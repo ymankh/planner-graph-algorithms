@@ -21,6 +21,7 @@ function SelectedFaceOverlayComponent({ points, visible }: SelectedFaceOverlayPr
       lineJoin="round"
       tension={0}
       listening={false}
+      perfectDrawEnabled={false}
     />
   );
 }

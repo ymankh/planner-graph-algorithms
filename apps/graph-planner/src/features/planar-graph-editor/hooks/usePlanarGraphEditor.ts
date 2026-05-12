@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import type { Edge, Face, NodeId, PointNode } from '../types/graph';
-import { getUndirectedEdgeKey } from '../algorithms/graphKeys';
+import { getUndirectedEdgeKey, type Edge, type NodeId, type PointNode } from 'graph-planner-algorithms';
 
 type UsePlanarGraphEditorOptions = {
   initialNodes?: PointNode[];
@@ -32,12 +31,14 @@ export function usePlanarGraphEditor(options: UsePlanarGraphEditorOptions = {}) 
     };
     nextNodeIdRef.current += 1;
     setNodes((current) => [...current, node]);
+    setSelectedFaceId(null);
   }, []);
 
   const moveNode = useCallback((nodeId: NodeId, x: number, y: number) => {
     setNodes((current) =>
       current.map((node) => (node.id === nodeId ? { ...node, x, y } : node)),
     );
+    setSelectedFaceId(null);
   }, []);
 
   const connectNodes = useCallback((from: NodeId, to: NodeId) => {
@@ -46,6 +47,7 @@ export function usePlanarGraphEditor(options: UsePlanarGraphEditorOptions = {}) 
     }
 
     const edgeKey = getUndirectedEdgeKey(from, to);
+    let added = false;
     setEdges((current) => {
       const alreadyExists = current.some(
         (edge) => getUndirectedEdgeKey(edge.from, edge.to) === edgeKey,
@@ -60,8 +62,12 @@ export function usePlanarGraphEditor(options: UsePlanarGraphEditorOptions = {}) 
         to,
       };
       nextEdgeIdRef.current += 1;
+      added = true;
       return [...current, edge];
     });
+    if (added) {
+      setSelectedFaceId(null);
+    }
   }, []);
 
   const clearGraph = useCallback(() => {
@@ -85,10 +91,6 @@ export function usePlanarGraphEditor(options: UsePlanarGraphEditorOptions = {}) 
     setSelectedNodeId(null);
   }, []);
 
-  const setSelectedFace = useCallback((face: Face | null) => {
-    setSelectedFaceId(face?.id ?? null);
-  }, []);
-
   return {
     nodes,
     edges,
@@ -101,6 +103,5 @@ export function usePlanarGraphEditor(options: UsePlanarGraphEditorOptions = {}) 
     selectFace,
     selectNodeForConnection,
     resetSelection,
-    setSelectedFace,
   };
 }

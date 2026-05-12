@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Line } from 'react-konva';
-import type { Edge, PointNode } from '../types/graph';
+import type { Edge, PointNode } from 'graph-planner-algorithms';
 
 type GraphEdgeProps = {
   edge: Edge;
@@ -19,6 +19,7 @@ function GraphEdgeComponent({ edge, from, to }: GraphEdgeProps) {
       lineJoin="round"
       opacity={0.85}
       listening={false}
+      perfectDrawEnabled={false}
     />
   );
 }
