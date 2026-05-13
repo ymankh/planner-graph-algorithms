@@ -18,6 +18,7 @@
     "bench": "npm run bench --workspace packages/graph-planner-algorithms",
     "bench:report": "npm run bench:report --workspace packages/graph-planner-algorithms",
     "preview": "npm run preview --workspace apps/graph-planner",
-    "pack:dry-run": "npm run pack:dry-run --workspace packages/graph-planner-algorithms"
+    "pack:dry-run": "npm run pack:dry-run --workspace packages/graph-planner-algorithms",
+    "publish:package": "npm publish --workspace packages/graph-planner-algorithms"
   }
 }

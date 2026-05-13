@@ -2,7 +2,9 @@
 
 Pure TypeScript utilities for working with straight-line planar graphs.
 
-This package contains only graph data types and geometry algorithms. It has no React, React DOM, Konva, React Konva, browser worker, or UI dependency.
+This package contains graph data types and geometry algorithms for detecting faces, building adjacency, measuring polygon area, and checking edge crossings.
+
+Repository: [ymankh/planner-graph-algorithms](https://github.com/ymankh/planner-graph-algorithms)
 
 ## Install
 
@@ -222,7 +224,7 @@ Converts ordered node ids into a flat coordinate array:
 [x1, y1, x2, y2, x3, y3]
 ```
 
-This is useful for canvas libraries such as Konva, but the function itself has no canvas dependency.
+This is useful when a renderer expects a flat coordinate list.
 
 Returns an empty array if any referenced node is missing.
 
@@ -274,7 +276,7 @@ The published npm package includes only:
 - `LICENSE`
 - `README.md`
 
-React app code, Konva components, assets, workers, and app build output are not included.
+Source files, tests, benchmarks, and repository-only files are not included.
 
 ## License
 
