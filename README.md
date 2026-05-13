@@ -101,6 +101,10 @@ The framework-independent algorithms have their own package README:
 - Package page: [graph-planner-algorithms](https://www.npmjs.com/package/graph-planner-algorithms)
 - Local package docs: [packages/graph-planner-algorithms/README.md](packages/graph-planner-algorithms/README.md)
 
+## Live Demo
+
+ [planner-graph-algorithms-graph-plan.vercel.app](https://planner-graph-algorithms-graph-plan.vercel.app)
+
 ## Package Separation
 
 The npm package lives in `packages/graph-planner-algorithms` and contains only pure TypeScript source. It does not import React, React DOM, Konva, React Konva, workers, or app components.
