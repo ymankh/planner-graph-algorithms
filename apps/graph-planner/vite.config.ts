@@ -14,6 +14,10 @@ export default defineConfig({
       'graph-planner-algorithms': algorithmsPackagePath,
     },
   },
+  build: {
+    emptyOutDir: false,
+  },
+  publicDir: false,
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] })
