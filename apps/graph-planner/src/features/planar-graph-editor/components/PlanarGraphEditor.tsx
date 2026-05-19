@@ -41,6 +41,7 @@ export function PlanarGraphEditor({
   } = useGraphDerivedData(nodes, edges, selectedFaceId);
   const stageShellRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 900, height: 620 });
+  const [hoveredFaceId, setHoveredFaceId] = useState<string | null>(null);
 
   useEffect(() => {
     const element = stageShellRef.current;
@@ -48,11 +49,26 @@ export function PlanarGraphEditor({
       return;
     }
 
+    let animationFrameId: number | null = null;
+
     const updateSize = () => {
-      const rect = element.getBoundingClientRect();
-      setSize({
-        width: Math.max(640, Math.floor(rect.width)),
-        height: Math.max(520, Math.floor(rect.height)),
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+      }
+
+      animationFrameId = requestAnimationFrame(() => {
+        const rect = element.getBoundingClientRect();
+        const nextSize = {
+          width: Math.max(640, Math.floor(rect.width)),
+          height: Math.max(520, Math.floor(rect.height)),
+        };
+
+        setSize((currentSize) =>
+          currentSize.width === nextSize.width && currentSize.height === nextSize.height
+            ? currentSize
+            : nextSize,
+        );
+        animationFrameId = null;
       });
     };
 
@@ -61,11 +77,17 @@ export function PlanarGraphEditor({
     const observer = new ResizeObserver(updateSize);
     observer.observe(element);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, []);
 
   const handleCanvasClick = useCallback(
     (x: number, y: number) => {
+      setHoveredFaceId(null);
       addNode(x, y);
     },
     [addNode],
@@ -83,6 +105,7 @@ export function PlanarGraphEditor({
         return;
       }
 
+      setHoveredFaceId(null);
       connectNodes(selectedNodeId, nodeId);
       selectNodeForConnection(null);
     },
@@ -91,20 +114,34 @@ export function PlanarGraphEditor({
 
   const handleNodeDragEnd = useCallback(
     (nodeId: string, x: number, y: number) => {
+      setHoveredFaceId(null);
       moveNode(nodeId, x, y);
     },
     [moveNode],
   );
 
   const handleDetectRegions = useCallback(() => {
+    setHoveredFaceId(null);
     detectRegions();
   }, [detectRegions]);
+
+  const handleClearGraph = useCallback(() => {
+    setHoveredFaceId(null);
+    clearGraph();
+  }, [clearGraph]);
+
+  const handleFaceClick = useCallback(
+    (faceId: string) => {
+      selectFace(faceId);
+    },
+    [selectFace],
+  );
 
   return (
     <div className={['editor-shell', className ?? ''].filter(Boolean).join(' ')}>
       <div className="editor-shell__inner">
         <EditorToolbar
-          onClear={clearGraph}
+          onClear={handleClearGraph}
           onDetectRegions={handleDetectRegions}
           nodeCount={nodes.length}
           edgeCount={edges.length}
@@ -120,11 +157,16 @@ export function PlanarGraphEditor({
               nodes={nodes}
               edges={edges}
               selectedNodeId={selectedNodeId}
+              faces={faces}
+              selectedFaceId={selectedFaceId}
               selectedFace={selectedFace}
+              hoveredFaceId={hoveredFaceId}
               selectedFacePolygonPoints={selectedFacePolygonPoints}
               onCanvasClick={handleCanvasClick}
               onNodeClick={handleNodeClick}
               onNodeDragEnd={handleNodeDragEnd}
+              onFaceHover={setHoveredFaceId}
+              onFaceClick={handleFaceClick}
             />
           </div>
 
@@ -149,7 +191,7 @@ export function PlanarGraphEditor({
                 <li>1. Click empty space to add a point.</li>
                 <li>2. Click one point and then another to connect them.</li>
                 <li>3. Drag points to reshape the graph.</li>
-                <li>4. Press Detect regions after edits, then select an inner region to highlight it.</li>
+                <li>4. Press Detect regions after edits, then hover or select an inner region to highlight it.</li>
               </ul>
               <div className="help-note">
                 Region detection runs in a worker so adding lots of points stays responsive.

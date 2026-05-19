@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback, type ComponentProps } from 'react';
 import { Circle, Group, Text } from 'react-konva';
 import type { PointNode } from 'graph-planner-algorithms';
 
@@ -13,6 +13,29 @@ type GraphNodeProps = {
 function GraphNodeComponent({ node, selected, connecting, onClick, onDragEnd }: GraphNodeProps) {
   const fill = selected ? '#f97316' : connecting ? '#22c55e' : '#38bdf8';
 
+  const handleClick = useCallback(
+    (event: Parameters<NonNullable<ComponentProps<typeof Group>['onClick']>>[0]) => {
+      event.cancelBubble = true;
+      onClick(node.id);
+    },
+    [node.id, onClick],
+  );
+
+  const handleTap = useCallback(
+    (event: Parameters<NonNullable<ComponentProps<typeof Group>['onTap']>>[0]) => {
+      event.cancelBubble = true;
+      onClick(node.id);
+    },
+    [node.id, onClick],
+  );
+
+  const handleDragEnd = useCallback(
+    (event: Parameters<NonNullable<ComponentProps<typeof Group>['onDragEnd']>>[0]) => {
+      onDragEnd(node.id, event.target.x(), event.target.y());
+    },
+    [node.id, onDragEnd],
+  );
+
   return (
     <Group
       x={node.x}
@@ -20,17 +43,9 @@ function GraphNodeComponent({ node, selected, connecting, onClick, onDragEnd }: 
       draggable
       listening
       perfectDrawEnabled={false}
-      onClick={(event) => {
-        event.cancelBubble = true;
-        onClick(node.id);
-      }}
-      onTap={(event) => {
-        event.cancelBubble = true;
-        onClick(node.id);
-      }}
-      onDragEnd={(event) => {
-        onDragEnd(node.id, event.target.x(), event.target.y());
-      }}
+      onClick={handleClick}
+      onTap={handleTap}
+      onDragEnd={handleDragEnd}
     >
       <Circle
         x={0}
@@ -57,4 +72,14 @@ function GraphNodeComponent({ node, selected, connecting, onClick, onDragEnd }: 
   );
 }
 
-export const GraphNode = memo(GraphNodeComponent);
+export const GraphNode = memo(
+  GraphNodeComponent,
+  (previous, next) =>
+    previous.node.id === next.node.id &&
+    previous.node.x === next.node.x &&
+    previous.node.y === next.node.y &&
+    previous.selected === next.selected &&
+    previous.connecting === next.connecting &&
+    previous.onClick === next.onClick &&
+    previous.onDragEnd === next.onDragEnd,
+);

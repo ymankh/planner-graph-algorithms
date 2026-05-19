@@ -16,6 +16,24 @@ export default defineConfig({
   },
   build: {
     emptyOutDir: false,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: 'react-vendor',
+              test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              priority: 20,
+            },
+            {
+              name: 'canvas-vendor',
+              test: /node_modules[\\/](konva|react-konva|react-reconciler)[\\/]/,
+              priority: 10,
+            },
+          ],
+        },
+      },
+    },
   },
   publicDir: false,
   plugins: [
